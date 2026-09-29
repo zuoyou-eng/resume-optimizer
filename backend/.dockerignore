@@ -1,0 +1,37 @@
+# 构建上下文排除清单（backend 的 context 是 ./backend）
+#
+# 为什么必须有这个文件：
+# 1. data/*.db 含真实上传的简历原文，进入镜像等于数据泄露
+# 2. .venv 是 Windows 本机虚拟环境（含平台相关原生模块），
+#    拷进 Linux 构建上下文只会拖慢构建，甚至导致 pip 解析到错误平台依赖
+# 3. __pycache__ / .pytest_cache 是本地产物，与镜像无关
+
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 数据与上传文件（含简历原文，严禁入镜像）
+data/
+*.db
+*.sqlite
+*.sqlite3
+uploads/
+
+# 测试与本地工具（镜像内不需要；tests 由 CI 单独跑）
+tests/
+htmlcov/
+.coverage
+*.log
+
+# 环境与密钥
+.env
+.env.*
+*.local
+
+# 系统
+.DS_Store
+Thumbs.db

@@ -1,0 +1,64 @@
+# 简历优化助手 · 本地一键编排（设计文档第 10 章：Docker Compose，一条命令拉起全部服务）
+#
+#   1) 复制 .env.example 为 .env 并按需修改
+#   2) docker compose up --build
+#   3) 浏览器访问 http://localhost
+#
+# 本地无 Docker 时的开发模式见 README.md。
+#
+# ⚠️ 部署边界：图片 OCR 依赖 Windows 内置 WinRT 引擎（通过 PowerShell 调用），
+# 因此在 Linux 容器内**不可用**——上传图片会返回 2001 并提示改用 PDF/Word。
+# 需要容器内支持图片时，应在 app/parser/image_parser.py 的 _BACKENDS 中
+# 注册一个跨平台 OCR 后端（如 RapidOCR / PaddleOCR），上层代码无需改动。
+
+services:
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-resume}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-resume_dev_pwd}
+      POSTGRES_DB: ${POSTGRES_DB:-resume_optimizer}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-resume}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    # 端口仅本机可见，避免数据库暴露
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-resume}:${POSTGRES_PASSWORD:-resume_dev_pwd}@db:5432/${POSTGRES_DB:-resume_optimizer}
+      MAX_FILE_SIZE_MB: "10"
+    volumes:
+      - uploads:/app/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    # 健康检查：容器启动时先执行 alembic upgrade head（见 backend/Dockerfile），
+    # 迁移失败会直接退出，不会进入"服务在跑但表不存在"的假活状态。
+    # frontend 据此等待 backend 真正就绪，而非仅仅"进程已启动"。
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5).status==200 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    expose:
+      - "8000"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  uploads:

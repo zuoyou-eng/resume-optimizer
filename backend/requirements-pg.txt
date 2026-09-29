@@ -1,0 +1,7 @@
+# NOTE: keep this file pure ASCII (see requirements.txt for the reason).
+#
+# PostgreSQL driver - only needed for docker compose / production deploy.
+# Do NOT install it for local development: SQLite is the default and this
+# package has no prebuilt wheel for Python 3.14, so installing it requires
+# a C toolchain on the machine.
+psycopg2-binary==2.9.10

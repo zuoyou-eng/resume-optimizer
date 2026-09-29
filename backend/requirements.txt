@@ -1,0 +1,36 @@
+# NOTE: keep this file pure ASCII.
+# pip reads requirements files with the locale encoding (GBK on Chinese
+# Windows). Any UTF-8 Chinese comment makes `pip install -r` crash with
+# UnicodeDecodeError before a single package is resolved. Verified on
+# Python 3.14 / Windows 11 zh-CN.
+fastapi==0.115.6
+# Docker installs [standard] (uvloop/httptools for better performance);
+# local dev used plain uvicorn to avoid compiling those extras. The two are
+# API-compatible, only performance differs.
+uvicorn[standard]==0.32.1
+sqlalchemy==2.0.54
+# Pinned to the version actually verified in dev/test. It used to declare
+# 2.10.4 while 2.13.5 was what the tests ran on, which made a rebuild from
+# requirements behave differently from the verified environment.
+pydantic==2.13.5
+python-multipart==0.0.20
+# Document parsing (design doc ch.2: mature per-domain libraries)
+pdfplumber==0.11.5
+python-docx==1.1.2
+# Database migrations: versioned schema (replaces create_all on startup)
+alembic==1.20.0
+# Tests (shift-left: written alongside the code)
+pytest==8.3.4
+httpx==0.28.1
+
+# ---------------------------------------------------------------------------
+# The PostgreSQL driver is deliberately NOT in this file.
+#
+# psycopg2-binary 2.9.10 has no prebuilt wheel for Python 3.14: installing it
+# falls back to a source build, which requires a C toolchain (Visual C++
+# Build Tools on Windows). Local development uses SQLite and never needs it,
+# so keeping it here would block anyone who just wants to run the project.
+#
+# Only install it when you actually use PostgreSQL (docker compose deploy):
+#   pip install -r requirements-pg.txt
+# ---------------------------------------------------------------------------

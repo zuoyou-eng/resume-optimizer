@@ -1,0 +1,21 @@
+# 构建上下文排除清单（frontend 的 context 是 ./frontend）
+#
+# 为什么必须有这个文件：
+# 1. node_modules 是本机（Windows）安装的依赖，含平台相关原生模块；
+#    拷进 Linux 构建上下文会让 Dockerfile 里的 npm install 命中错误平台依赖，
+#    且白白增加数百 MB 上下文传输
+# 2. dist 是本地构建产物，镜像内会重新 npm run build，不需要带入
+
+node_modules/
+dist/
+.vite/
+
+# 日志与本地环境
+*.log
+.env
+.env.*
+*.local
+
+# 系统
+.DS_Store
+Thumbs.db

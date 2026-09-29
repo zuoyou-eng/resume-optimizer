@@ -1,0 +1,223 @@
+{
+  "base": "http://127.0.0.1:8000/api/v1",
+  "scenarios": {
+    "PF-01": {
+      "title": "单份 1 页简历完整链路",
+      "threshold": "总耗时 ≤ 15s（NFR-01）",
+      "samples": [
+        {
+          "upload_s": 0.0221,
+          "diagnose_s": 0.0204,
+          "report_s": 0.0071,
+          "total_s": 0.0496
+        },
+        {
+          "upload_s": 0.035,
+          "diagnose_s": 0.0155,
+          "report_s": 0.0055,
+          "total_s": 0.056
+        },
+        {
+          "upload_s": 0.0273,
+          "diagnose_s": 0.0144,
+          "report_s": 0.0051,
+          "total_s": 0.0468
+        },
+        {
+          "upload_s": 0.0337,
+          "diagnose_s": 0.018,
+          "report_s": 0.0061,
+          "total_s": 0.0578
+        },
+        {
+          "upload_s": 0.0252,
+          "diagnose_s": 0.0177,
+          "report_s": 0.0055,
+          "total_s": 0.0484
+        }
+      ],
+      "max_total_s": 0.0578,
+      "mean_total_s": 0.0517,
+      "pass": true
+    },
+    "PF-02": {
+      "title": "单份 3 页简历完整链路",
+      "threshold": "记录基线（无硬指标）",
+      "samples": [
+        {
+          "upload_s": 0.0167,
+          "diagnose_s": 0.0225,
+          "report_s": 0.0069,
+          "total_s": 0.0461
+        },
+        {
+          "upload_s": 0.0327,
+          "diagnose_s": 0.0216,
+          "report_s": 0.0065,
+          "total_s": 0.0608
+        },
+        {
+          "upload_s": 0.0321,
+          "diagnose_s": 0.0228,
+          "report_s": 0.0058,
+          "total_s": 0.0607
+        }
+      ],
+      "mean_total_s": 0.0559
+    },
+    "PF-07": {
+      "title": "分段耗时分析",
+      "threshold": "给出瓶颈定位结论",
+      "segments_s": {
+        "upload_and_parse": 0.0188,
+        "diagnose": 0.0267,
+        "report": 0.0101
+      },
+      "server_reported_diagnose_ms": 24.3,
+      "total_s": 0.0556,
+      "share_pct": {
+        "upload_and_parse": 33.8,
+        "diagnose": 48.0,
+        "report": 18.2
+      },
+      "bottleneck": "diagnose"
+    },
+    "PF-03": {
+      "title": "10 用户并发诊断",
+      "threshold": "响应时间增幅 ≤ 50%（NFR-02）",
+      "baseline": {
+        "n": 10,
+        "mean_s": 0.0205,
+        "samples_s": [
+          0.0245,
+          0.0244,
+          0.0226,
+          0.0239,
+          0.0207,
+          0.0241,
+          0.0188,
+          0.0149,
+          0.0166,
+          0.0143
+        ]
+      },
+      "concurrent": {
+        "concurrency": 10,
+        "diagnose_times_s": [
+          0.0528,
+          0.1633,
+          0.1263,
+          0.1463,
+          0.0829,
+          0.0628,
+          0.0874,
+          0.2035,
+          0.1751,
+          0.112
+        ],
+        "mean_s": 0.1212,
+        "max_s": 0.2035,
+        "min_s": 0.0528,
+        "wall_clock_s": 0.2585
+      },
+      "increase_pct": 491.2,
+      "throughput": {
+        "serial_10_total_s": 0.205,
+        "concurrent_10_wall_s": 0.2585,
+        "speedup_x": 0.79
+      },
+      "pass": false
+    },
+    "PF-04": {
+      "title": "20 用户并发诊断（观察项）",
+      "threshold": "记录系统行为与降级情况",
+      "concurrent": {
+        "concurrency": 20,
+        "diagnose_times_s": [
+          0.0886,
+          0.2294,
+          0.3292,
+          0.3842,
+          0.4349,
+          0.2002,
+          0.2813,
+          0.4676,
+          0.0984,
+          0.1063,
+          0.2615,
+          0.1279,
+          0.4007,
+          0.1887,
+          0.2906,
+          0.3351,
+          0.2084,
+          0.2383,
+          0.1302,
+          0.1401
+        ],
+        "mean_s": 0.2471,
+        "max_s": 0.4676,
+        "min_s": 0.0886,
+        "wall_clock_s": 0.5355
+      },
+      "increase_pct_vs_baseline": 1105.4
+    },
+    "PF-05": {
+      "title": "大文件上传",
+      "threshold": "记录耗时与稳定性",
+      "size_mb": 5.66,
+      "elapsed_s": 0.9841,
+      "fields_extracted": 5,
+      "stable": true
+    },
+    "PF-06": {
+      "title": "连续 50 次诊断",
+      "threshold": "无内存泄漏趋势、无性能衰减",
+      "n": 50,
+      "mean_s": 0.0211,
+      "first10_mean_s": 0.0227,
+      "last10_mean_s": 0.0231,
+      "drift_pct": 1.7,
+      "pass": true
+    },
+    "PF-08": {
+      "title": "单条改写响应时间",
+      "threshold": "记录耗时（改写含两次模型调用，天然高于诊断）",
+      "samples_s": [
+        0.0296,
+        0.0134,
+        0.0145
+      ],
+      "mean_s": 0.0192
+    },
+    "PF-09": {
+      "title": "批量应用 vs 逐条应用",
+      "threshold": "验证批量接口收益",
+      "n": 4,
+      "single_total_s": 0.0162,
+      "batch_total_s": 0.0085,
+      "speedup_pct": 47.5
+    },
+    "PF-10": {
+      "title": "草稿版本快照写入开销",
+      "threshold": "版本数达上限时写入性能无明显劣化",
+      "n_writes": 20,
+      "first5_mean_s": 0.0175,
+      "last5_mean_s": 0.0188,
+      "degradation_pct": 7.8,
+      "pass": true
+    },
+    "PF-11": {
+      "title": "回滚操作响应时间",
+      "threshold": "记录耗时（大字段草稿）",
+      "elapsed_s": 0.0196,
+      "rolled_back_to": 1,
+      "total_revisions": 20
+    }
+  },
+  "notes": [
+    "PF-03/04 运行在 SQLite 上：SQLite 写操作串行化，并发写竞争强于 PostgreSQL，故此处增幅为悲观上界；报告同时给出吞吐加速比作为交叉验证。"
+  ],
+  "started_at": "2026-09-27 21:30:25",
+  "finished_at": "2026-09-27 21:30:30"
+}
