@@ -4,6 +4,10 @@
 > 上传简历 → 结构化解析 → 解析结果全量可见（含解析轨迹与未识别内容提示）。
 > 对应需求 FR-01 / FR-02 / FR-03，架构遵循《系统设计文档 V1.1》。
 
+**远程仓库**：https://github.com/zuoyou-eng/resume-optimizer （Public，MIT License）
+**CI 状态**：GitHub Actions 已配置并在推送时自动运行——两个 job（后端 pytest + 前端 `npm ci && build`），最近一次运行全部通过。
+**测试规模**：331 项 pytest 用例（Linux 上 6 项 Windows 专属 OCR 测试按平台自动跳过，即 325 passed + 6 skipped）。
+
 ## 目录结构
 
 ```
