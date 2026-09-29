@@ -11,8 +11,15 @@ scripts/__pycache__/
 *.log
 backend/.backend.log
 
-# 界面截图由脚本重新生成，不入库
-screenshots/
+# 界面截图：默认不入库（可能含真实简历原文），仅放行实验课交付的 6 张
+# （这 6 张均基于 examples/ 下的自造虚构样本生成，不含真实个人信息）
+screenshots/*
+!screenshots/01-upload.png
+!screenshots/02-parse-result.png
+!screenshots/03-diagnose-report.png
+!screenshots/04-draft-workspace.png
+!screenshots/05-highlight-mining.png
+!screenshots/06-resume-list.png
 
 # 本地临时验证目录
 .e2e/
