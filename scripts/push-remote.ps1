@@ -46,13 +46,17 @@ if ($dirty) {
 }
 Write-Ok "工作区干净（无未提交改动）"
 
-# 1.2 受控文件数应为 105
+# 1.2 文件数合理性检查
+# 不做精确匹配（正常开发会增减文件），只防两种异常：
+#   - 过多：.gitignore 失效导致 node_modules/ 或 backend/data/ 涌入
+#   - 过少：仓库被误删或 .gitignore 误伤源码
 $fileCount = (git ls-files | Measure-Object).Count
-if ($fileCount -ne 105) {
-    Write-Bad "受控文件数为 $fileCount，预期 105。若非刻意增减，请检查 .gitignore 是否被改动。"
+if ($fileCount -gt 200 -or $fileCount -lt 90) {
+    Write-Bad "受控文件数为 $fileCount，不在合理区间 90-200。"
+    Write-Host "  过多通常是 .gitignore 失效；过少通常是源码被误忽略。请先排查。"
     exit 1
 }
-Write-Ok "受控文件数 105（符合预期）"
+Write-Ok "受控文件数 $fileCount（在合理区间 90-200）"
 
 # 1.3 真实简历数据库绝不能被跟踪（代码管理规范 4.8 红线 1）
 $dbTracked = (git ls-files | Select-String -Pattern "data/resume\.db" | Measure-Object).Count
