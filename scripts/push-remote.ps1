@@ -68,11 +68,17 @@ if ($dbTracked -gt 0) {
 Write-Ok "真实简历库未被跟踪（红线 1 通过）"
 
 # 1.4 大文件检查（>1MB 的应只有 package-lock.json 与 6 张截图）
-$big = git ls-files -z | ForEach-Object { $_ } | ForEach-Object {
-    $p = $_
-    if (Test-Path -LiteralPath $p) {
-        $len = (Get-Item -LiteralPath $p).Length
-        if ($len -gt 1MB) { [pscustomobject]@{ Size = $len; Path = $p } }
+# 注意：不能用 git ls-files -z，其 NUL 分隔在 PowerShell 中不会被拆分成多个字符串
+$big = git ls-files | ForEach-Object {
+    $p = $_.Trim()
+    if (-not $p) { return }
+    try {
+        if (Test-Path -LiteralPath $p -PathType Leaf -ErrorAction Stop) {
+            $len = (Get-Item -LiteralPath $p -ErrorAction Stop).Length
+            if ($len -gt 1MB) { [pscustomobject]@{ Size = $len; Path = $p } }
+        }
+    } catch {
+        # 路径含通配符等特殊字符时跳过，不影响主流程
     }
 }
 if ($big) {
