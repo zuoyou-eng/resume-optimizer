@@ -89,11 +89,27 @@ if ($big) {
 }
 
 # 1.5 确认将推送的提交
+# 注意：$ErrorActionPreference="Stop" 会把 git 写 stderr 的行为升级为终止错误，
+# 因此这里显式改用 Continue，并先判断 origin/main 是否存在（未配远程时它必然不存在）。
 Write-Info "即将推送的提交："
-git log --oneline origin/main..main 2>$null | ForEach-Object { Write-Host "         $_" }
-if ($LASTEXITCODE -ne 0) {
+$prevEap = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+$remoteMainExists = $false
+if ((git remote | Select-String -Pattern "^origin$")) {
+    git rev-parse --verify --quiet origin/main 2>$null | Out-Null
+    $remoteMainExists = ($LASTEXITCODE -eq 0)
+}
+if ($remoteMainExists) {
+    $commits = git log --oneline origin/main..main
+    if (-not $commits) {
+        Write-Host "         （无新提交，远程已是最新）"
+    } else {
+        $commits | ForEach-Object { Write-Host "         $_" }
+    }
+} else {
     git log --oneline -3 | ForEach-Object { Write-Host "         $_" }
 }
+$ErrorActionPreference = $prevEap
 
 if ($DryRun) {
     Write-Host "`n-DryRun 指定，跳过实际推送。" -ForegroundColor Yellow
